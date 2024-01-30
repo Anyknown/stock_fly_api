@@ -1,37 +1,55 @@
-import alpha_vantage
 import pandas as pd
+import requests
 
 
 API_KEY = 'QIF8N31AVQSTQK8C'
+API_URL = 'https://www.alphavantage.co/query'
+
 symbols = ['TSLA', 'U', 'TWLO', 'AMZN', 'ASML', 'ATEN']
 
 
-client = alpha_vantage.APIClient(key=API_KEY)
+params = {
+    'function': 'GLOBAL_QUOTE',
+    'apikey': API_KEY,
+    'datatype': 'json',
+    'symbols': ','.join(symbols)
+}
+response = requests.get(API_URL, params=params)
+data = response.json()
+current_prices = {k.split('.')[1]: v['2. price'] for k, v in data.items()}
 
 
-intraday_data = client.get_intraday(symbol=','.join(symbols), interval='1min')
+df = pd.DataFrame(columns=['Purchase Price', 'Symbol', 'Percentage Change'])
 
+while True:
+    try:
+        purchase_price = float(input('Enter the purchase price for a stock: '))
+        symbol = input('Enter the stock symbol (TSLA, U, TWLO, AMZN, ASML, ATEN): ')
 
-closes = [intraday_data['Time Series (1min)'][symbol]['4. close'] for symbol in symbols]
+        if symbol not in symbols:
+            print('Invalid symbol. Please try again.')
+            continue
 
+        if symbol not in current_prices:
+            print('Error fetching current price. Please try again.')
+            continue
 
-df = pd.DataFrame(closes, index=symbols, columns=['Close'])
+        current_price = float(current_prices[symbol])
 
+        
+        percentage_change = ((current_price - purchase_price) / purchase_price) * 100
 
-df['Purchase Price'] = None
+       
+        new_row = pd.DataFrame([[purchase_price, symbol, percentage_change]],
+                               columns=['Purchase Price', 'Symbol', 'Percentage Change'])
 
+        
+        df = df.append(new_row, ignore_index=True)
 
-df['% Growth/Loss'] = None
+        print('Stock added successfully.')
 
+    except ValueError:
+        print('Invalid input. Please try again.')
 
-def calculate_growth_loss(row):
-    if row['Purchase Price'] is not None:
-        return ((row['Close'] - row['Purchase Price']) / row['Purchase Price']) * 100
-    else:
-        return None
-
-
-df['% Growth/Loss'] = df.apply(calculate_growth_loss, axis=1)
-
-
-print(df)
+   
+    print(df.to_string(index=False))
