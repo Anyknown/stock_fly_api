@@ -26,5 +26,5 @@ jobs:
 
     - name: Run tests
       run: |
-        python Alpha_v_stocktrack.py
+        python alpha_v_stocktrack.py
         
