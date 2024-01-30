@@ -1,42 +1,25 @@
 import pandas as pd
 import requests
 
-# Function to fetch stock prices using Alpha Vantage API
-def fetch_stock_prices():
-    api_key = "QIF8N31AVQSTQK8C"
-    symbols = ["TSLA", "U", "TWLO", "AMZN", "ASML", "ATEN"]
-    url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbols={','.join(symbols)}&apikey={api_key}"
-    response = requests.get(url)
-    data = response.json()
-    stock_prices = {}
-    for symbol in symbols:
-        stock_prices[symbol] = float(data[f"Global Quote.05.price"].get(symbol))
-    return stock_prices
+# Define the API request for Alpha Vantage
+API_KEY = "QIF8N31AVQSTQK8C"
+API_URL = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbols=TSLA,U,TWLO,AMZN,ASML,ATEN&apikey={API_KEY}"
 
-# Function to calculate percentage growth or loss
-def calculate_growth(purchase_prices, stock_prices):
-    growth = {}
-    for symbol in stock_prices:
-        growth[symbol] = ((stock_prices[symbol] - purchase_prices[symbol]) / purchase_prices[symbol]) * 100
-    return growth
+# Fetch the stock prices from Alpha Vantage
+response = requests.get(API_URL)
+stock_data = response.json()
 
-# Prompt user to enter purchase prices
-purchase_prices = {}
-symbols = ["TSLA", "U", "TWLO", "AMZN", "ASML", "ATEN"]
-for symbol in symbols:
-    purchase_prices[symbol] = float(input(f"Enter purchase price for {symbol}: "))
+# Prepare the DataFrame
+data = []
+for symbol in ["TSLA", "U", "TWLO", "AMZN", "ASML", "ATEN"]:
+    stock_price = stock_data["Global Quote"]["05. price"][symbol]
+    data.append([None, stock_price, None])
 
-# Fetch stock prices
-stock_prices = fetch_stock_prices()
+# Create the DataFrame
+df = pd.DataFrame(data, columns=["Purchase Price", "Current Stock Price", "Growth/Loss %"])
 
-# Calculate percentage growth or loss
-growth = calculate_growth(purchase_prices, stock_prices)
+# Calculate the growth/loss %
+df.loc[:, "Growth/Loss %"] = df["Current Stock Price"].pct_change()
 
-# Create a Pandas DataFrame
-df = pd.DataFrame(list(growth.items()), columns=["Stock", "Growth (%)"])
-
-# Add a column for purchase prices
-df.insert(0, "Purchase Price", list(purchase_prices.values()))
-
-# Print the DataFrame
-print(df)
+# Save the DataFrame to an Excel file
+df.to_excel("stock_table.xlsx", index=False)
