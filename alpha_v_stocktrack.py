@@ -1,55 +1,42 @@
 import pandas as pd
 import requests
 
+# Function to fetch stock prices using Alpha Vantage API
+def fetch_stock_prices():
+    api_key = "QIF8N31AVQSTQK8C"
+    symbols = ["TSLA", "U", "TWLO", "AMZN", "ASML", "ATEN"]
+    url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbols={','.join(symbols)}&apikey={api_key}"
+    response = requests.get(url)
+    data = response.json()
+    stock_prices = {}
+    for symbol in symbols:
+        stock_prices[symbol] = float(data[f"Global Quote.05.price"].get(symbol))
+    return stock_prices
 
-API_KEY = 'QIF8N31AVQSTQK8C'
-API_URL = 'https://www.alphavantage.co/query'
+# Function to calculate percentage growth or loss
+def calculate_growth(purchase_prices, stock_prices):
+    growth = {}
+    for symbol in stock_prices:
+        growth[symbol] = ((stock_prices[symbol] - purchase_prices[symbol]) / purchase_prices[symbol]) * 100
+    return growth
 
-symbols = ['TSLA', 'U', 'TWLO', 'AMZN', 'ASML', 'ATEN']
+# Prompt user to enter purchase prices
+purchase_prices = {}
+symbols = ["TSLA", "U", "TWLO", "AMZN", "ASML", "ATEN"]
+for symbol in symbols:
+    purchase_prices[symbol] = float(input(f"Enter purchase price for {symbol}: "))
 
+# Fetch stock prices
+stock_prices = fetch_stock_prices()
 
-params = {
-    'function': 'GLOBAL_QUOTE',
-    'apikey': API_KEY,
-    'datatype': 'json',
-    'symbols': ','.join(symbols)
-}
-response = requests.get(API_URL, params=params)
-data = response.json()
-current_prices = {k.split('.')[1]: v['2. price'] for k, v in data.items()}
+# Calculate percentage growth or loss
+growth = calculate_growth(purchase_prices, stock_prices)
 
+# Create a Pandas DataFrame
+df = pd.DataFrame(list(growth.items()), columns=["Stock", "Growth (%)"])
 
-df = pd.DataFrame(columns=['Purchase Price', 'Symbol', 'Percentage Change'])
+# Add a column for purchase prices
+df.insert(0, "Purchase Price", list(purchase_prices.values()))
 
-while True:
-    try:
-        purchase_price = float(input('Enter the purchase price for a stock: '))
-        symbol = input('Enter the stock symbol (TSLA, U, TWLO, AMZN, ASML, ATEN): ')
-
-        if symbol not in symbols:
-            print('Invalid symbol. Please try again.')
-            continue
-
-        if symbol not in current_prices:
-            print('Error fetching current price. Please try again.')
-            continue
-
-        current_price = float(current_prices[symbol])
-
-        
-        percentage_change = ((current_price - purchase_price) / purchase_price) * 100
-
-       
-        new_row = pd.DataFrame([[purchase_price, symbol, percentage_change]],
-                               columns=['Purchase Price', 'Symbol', 'Percentage Change'])
-
-        
-        df = df.append(new_row, ignore_index=True)
-
-        print('Stock added successfully.')
-
-    except ValueError:
-        print('Invalid input. Please try again.')
-
-   
-    print(df.to_string(index=False))
+# Print the DataFrame
+print(df)
