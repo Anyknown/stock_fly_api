@@ -1,25 +1,11 @@
-name: Python application
-
-on: [push, pull_request]
-
+name: Run Generate Table
+on: [push]
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Run tests
-      run: |
-        python alpha_v_stocktrack.py
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run Python script
+        run: |
+          python alpha_v_stocktrack.py
