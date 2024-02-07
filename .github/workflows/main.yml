@@ -5,18 +5,19 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.8'
-
     - name: Install dependencies
       run: pip install -r requirements.txt
-
     - name: Execute script with command-line arguments
       run: python alpha_v_stocktrack.py 299.42 101.52 119.47 148.48 683.04 15.46
+    - name: Upload output file as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: stock_prices
+        path: stock_prices.csv
