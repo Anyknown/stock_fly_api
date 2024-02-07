@@ -21,5 +21,10 @@ df = pd.DataFrame({
 })
 
 df['% Profit/Loss'] = ((df['Real-Time Price'] - df['Purchase Price']) / df['Purchase Price']) * 100
+df['% Profit/Loss'] = df['% Profit/Loss'].round(2)  # Round to 2 decimal places
+
+cumulative_profit_loss = df['% Profit/Loss'].sum()
+cumulative_row = pd.DataFrame({'Stock Ticker': 'Cumulative', '% Profit/Loss': cumulative_profit_loss}, index=[len(df)])
+df = pd.concat([df, cumulative_row]).reset_index(drop=True)
 
 df.to_csv('stock_prices.csv', index=False)
