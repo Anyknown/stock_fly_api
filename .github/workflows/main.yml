@@ -1,18 +1,19 @@
-name: Run Python Script
-on: [push]
+name: alpha v stocktrack
+
+on:
+  push:
+    branches: [ main ]
+
 jobs:
-  build:
+  update_prices:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-      - name: Run Python script
-        run: |
-          python alpha_v_stocktrack.py
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'  
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt  
+    - name: Run Python script
+      run: python alpha_v_stocktrack.py  
