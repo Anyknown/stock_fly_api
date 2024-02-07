@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+import sys
 
 API_KEY = 'QIF8N31AVQSTQK8C'
 symbols = ['TSLA', 'U', 'TWLO', 'AMZN', 'ASML', 'ATEN']
@@ -11,16 +12,7 @@ for symbol in symbols:
     data = response.json()
     stock_prices[symbol] = float(data['Global Quote']['05. price'])
 
-purchase_prices = []
-for symbol in symbols:
-    while True:
-        try:
-            price_input = input(f"Enter purchase price for {symbol}: ")
-            purchase_price = float(price_input)
-            purchase_prices.append(purchase_price)
-            break  # Exit the loop if input and conversion are successful
-        except ValueError:
-            print("Invalid input. Please enter a valid numeric value.")
+purchase_prices = [float(price) for price in sys.argv[1:]]  # Accept purchase prices as command-line arguments
 
 df = pd.DataFrame({
     'Stock Ticker': symbols,
