@@ -6,7 +6,7 @@ symbols = ['TSLA', 'U', 'TWLO', 'AMZN', 'ASML', 'ATEN']
 
 stock_prices = {}
 for symbol in symbols:
-    url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={QIF8N31AVQSTQK8C}'
+    url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={API_KEY}'
     response = requests.get(url)
     data = response.json()
     stock_prices[symbol] = float(data['Global Quote']['05. price'])
