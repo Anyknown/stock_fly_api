@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-df = pd.DataFrame({'Purchase Price': []})
+
 API_KEY = 'QIF8N31AVQSTQK8C'
 symbols = ['TSLA', 'U', 'TWLO', 'AMZN', 'ASML', 'ATEN']
 
@@ -10,6 +10,13 @@ for symbol in symbols:
     response = requests.get(url)
     data = response.json()
     stock_prices[symbol] = float(data['Global Quote']['05. price'])
-    df['Stock Price'] = list(stock_prices.values())
-    df['% Growth/Loss'] = (df['Stock Price'] - df['Purchase Price']) / df['Purchase Price'] * 100
-    df.to_csv('stock_prices.csv', index=False)
+
+df = pd.DataFrame({
+    'Stock Ticker': symbols,
+    'Purchase Price': [float(input(f"Enter purchase price for {symbol}: ")) for symbol in symbols],
+    'Real-Time Price': [stock_prices[symbol] for symbol in symbols]
+})
+
+df['% Profit/Loss'] = ((df['Real-Time Price'] - df['Purchase Price']) / df['Purchase Price']) * 100
+
+df.to_csv('stock_prices.csv', index=False)
